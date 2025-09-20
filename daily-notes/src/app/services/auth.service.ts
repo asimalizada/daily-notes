@@ -14,6 +14,7 @@ export interface AccountMeta {
 const KEY_ACCOUNTS = 'diary_accounts_v1';
 const KEY_MASTER_META = 'diary_master_meta_v1';
 const NOTES_KEY = (id: string) => `diary_notes_enc_${id}`;
+const SESSION_KEY = 'diary_session_v1';
 
 /**
  * WARNING: This service uses a single predefined MASTER_SECRET.
@@ -34,6 +35,7 @@ export class AuthService {
   constructor(private crypto: CryptoService) {
     // ensure master meta exists (salt for KEK derivation)
     this.ensureMasterMeta();
+    this.restoreSessionIfAny();
   }
 
   // ---------- Master meta (holds a salt for the MASTER_SECRET) ----------
@@ -110,6 +112,7 @@ export class AuthService {
       );
       this.dek = await this.crypto.unwrapDEK(acc.dekWrappedByMaster, kekMaster);
       this.currentAccountId.set(id);
+      await this.persistSession(id, this.dek!);
       return;
     }
 
@@ -118,6 +121,7 @@ export class AuthService {
       const kek = await this.crypto.deriveKEK(pw, acc.saltB64);
       this.dek = await this.crypto.unwrapDEK(acc.dekWrappedByAccount, kek);
       this.currentAccountId.set(id);
+      await this.persistSession(id, this.dek!);
 
       // Optional: migrate to add master wrap if missing (now that we have the DEK)
       if (this.MASTER_SECRET && !acc.dekWrappedByMaster) {
@@ -143,6 +147,7 @@ export class AuthService {
   logout() {
     this.currentAccountId.set(null);
     this.dek = null;
+    sessionStorage.removeItem(SESSION_KEY);
   }
 
   // ---------- Encrypted notes load/save ----------
@@ -170,8 +175,6 @@ export class AuthService {
     const raw = localStorage.getItem(KEY_ACCOUNTS);
     return raw ? (JSON.parse(raw) as AccountMeta[]) : [];
   }
-
-  // inside AuthService class
 
   /**
    * Reset an account password as master/admin.
@@ -218,5 +221,34 @@ export class AuthService {
       list.map((a) => (a.id === acc.id ? updatedMeta : a))
     );
     localStorage.setItem(KEY_ACCOUNTS, JSON.stringify(this.accounts()));
+  }
+
+  private async persistSession(accountId: string, dek: CryptoKey) {
+    const rawB64 = await this.crypto.exportDEK(dek); // base64 of raw key
+    sessionStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({ accountId, dek: rawB64 })
+    );
+  }
+
+  private async restoreSessionIfAny() {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return;
+    try {
+      const { accountId, dek } = JSON.parse(raw) as {
+        accountId: string;
+        dek: string;
+      };
+      // Make sure account still exists
+      if (!this.accounts().some((a) => a.id === accountId)) {
+        sessionStorage.removeItem(SESSION_KEY);
+        return;
+      }
+      const key = await this.crypto.importDEK(dek);
+      this.dek = key;
+      this.currentAccountId.set(accountId);
+    } catch {
+      sessionStorage.removeItem(SESSION_KEY);
+    }
   }
 }
