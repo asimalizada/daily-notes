@@ -1,1 +1,44 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --panel-2: #f1f5f9;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #0ea5e9;
+  --accent: #10b981;
+  --danger: #ef4444;
+  --border: #e2e8f0;
+  --shadow: 0 10px 20px rgba(2, 8, 23, 0.08);
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b1020;
+  --panel: #12172a;
+  --panel-2: #0f1426;
+  --text: #e5e9f5;
+  --muted: #94a3b8;
+  --primary: #38bdf8;
+  --accent: #34d399;
+  --danger: #f87171;
+  --border: #1f2937;
+  --shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+* {
+  box-sizing: border-box;
+}
+button {
+  font: inherit;
+}
