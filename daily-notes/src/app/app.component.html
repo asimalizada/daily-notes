@@ -1,179 +1,240 @@
-<div class="wrap">
-  <div class="header">
-    <div class="title">Angular Diary</div>
-    <div class="header-actions">
-      <select class="btn" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
-        <option value="system">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
+<!-- AUTH GATE -->
+<div *ngIf="!auth.currentAccountId(); else diaryUi" class="panel" style="max-width:720px; margin:24px auto;">
+  <h2 style="padding:16px;">Sign in</h2>
+  <div class="panel-body" style="display:grid; gap:16px;">
+
+    <!-- Register Account -->
+    <div class="card" style="border:1px solid var(--border); border-radius:12px; padding:12px;">
+      <h3>Register Account</h3>
+      <label>Account Name</label>
+      <input type="text" [(ngModel)]="newAccName" class="btn" style="width:100%;">
+      <label>Password</label>
+      <input type="password" [(ngModel)]="newAccPassword" class="btn" style="width:100%;">
+      <div style="margin-top:8px;">
+        <button class="btn primary" (click)="registerAccount()">Create Account</button>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div class="card" style="border:1px solid var(--border); border-radius:12px; padding:12px;">
+      <h3>Login</h3>
+      <label>Account</label>
+      <select class="btn" [(ngModel)]="selectedLoginAccountId" style="width:100%;">
+        <option [ngValue]="null" disabled>Select…</option>
+        <option *ngFor="let a of auth.accounts()" [ngValue]="a.id">{{ a.name }}</option>
       </select>
-      <button class="btn primary" (click)="newNote()">New Note</button>
-    </div>
-  </div>
 
-  <div class="layout">
-    <!-- Sidebar: Important Notes -->
-    <div class="panel">
-      <h2>Important Notes</h2>
-      <div class="panel-body">
-        <div *ngIf="important().length === 0" class="muted">No important notes yet.</div>
-        <div *ngFor="let n of important()" class="note-li" (click)="openViewer(n)">
-          <div style="flex:1;">
-            <h4>{{ n.title || '(No title)' }}</h4>
-            <div class="meta">{{ n.dateISO }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main: Calendar + selected day notes -->
-    <div class="panel" style="overflow:clip;">
-      <div class="cal-head">
-        <button class="btn" (click)="prevMonth()">‹</button>
-        <h3>{{ monthLabel() }}</h3>
-        <button class="btn" (click)="nextMonth()">›</button>
+      <div *ngIf="loginMode === 'account'">
+        <label>Password</label>
+        <input type="password" [(ngModel)]="loginPassword" class="btn" style="width:100%;">
       </div>
 
-      <div class="cal-grid">
-        <div class="dow" *ngFor="let d of dows">{{ d }}</div>
-        <ng-container *ngFor="let d of calendarDays()">
-          <div class="day" [class.other]="!d.inMonth" [class.today]="d.isToday"
-            [class.selected]="d.iso === selectedDate()" (click)="selectDate(d.iso)">
-            <div class="date">{{ d.day }}</div>
-            <div *ngIf="hasNotesOn(d.iso)" class="dot"></div>
-          </div>
-        </ng-container>
-      </div>
-
-      <h2 style="padding:0 16px 8px;">{{ selectedDate() }} — Notes</h2>
-      <div class="day-list">
-        <div *ngIf="dayNotes().length===0" class="panel-body" style="color:var(--muted)">No notes on this day.</div>
-        <div *ngFor="let n of dayNotes()" class="note-card">
-          <div class="note-top">
-            <h4>{{ n.title || '(No title)' }}</h4>
-            <div class="meta">{{ n.isImportant ? '⭐ Important' : 'Daily' }} · {{ n.dateISO }}</div>
-          </div>
-          <div [innerHTML]="n.contentHtml"></div>
-          <div *ngIf="n.imageDataUrls?.length"
-            style="margin-top:8px; display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:8px;">
-            <img *ngFor="let img of n.imageDataUrls" [src]="img" class="thumb" />
-          </div>
-          <div style="margin-top:8px; display:flex; gap:8px;">
-            <button class="btn" (click)="openViewer(n)">Open</button>
-            <button class="btn" title="Edit" (click)="startEdit(n)">✏️ Edit</button>
-          </div>
-        </div>
+      <div style="margin-top:8px;">
+        <button class="btn primary" (click)="login()">Login</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Drawer: Editor -->
-<div class="drawer" [class.open]="mode() === 'edit'">
-  <div class="drawer-head">
-    <div>{{ editId() ? 'Edit Note' : 'New Note' }}</div>
-    <button class="btn" (click)="closeEditor()">✕</button>
-  </div>
-  <div class="drawer-body">
-    <div class="row">
-      <div>
-        <label>Title</label>
-        <input type="text" [(ngModel)]="title" placeholder="Title">
-      </div>
-      <div>
-        <label>Date</label>
-        <input type="date" [(ngModel)]="dateISO">
+<ng-template #diaryUi>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">Angular Diary</div>
+      <div class="header-actions">
+        <select class="btn" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+        <button class="btn primary" (click)="newNote()">New Note</button>
+        <span *ngIf="auth.currentAccountId()" class="meta">
+          Account: {{ currentAccount()?.name }}
+        </span>
+        <button class="btn" *ngIf="auth.currentAccountId()" (click)="logout()">Log out</button>
+
       </div>
     </div>
 
-    <div>
-      <label>Rich Text</label>
-      <rich-text-editor [(value)]="contentHtml"></rich-text-editor>
-    </div>
-
-    <div class="row">
-      <!-- <div>
-        <label>Pictures</label>
-        <input type="file" accept="image/*" multiple (change)="onImages($event)">
-        <div *ngIf="imageDataUrls?.length"
-          style="margin-top:8px; display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:8px;">
-          <img *ngFor="let img of imageDataUrls; let i = index" [src]="img" class="thumb"
-            (click)="openImageViewer(imageDataUrls, i)" />
-        </div>
-      </div> -->
-      <div>
-        <label>Pictures</label>
-        <input type="file" accept="image/*" multiple (change)="onImages($event)">
-
-        <div *ngIf="imageDataUrls.length" class="image-grid">
-          <div *ngFor="let img of imageDataUrls; let i = index" class="image-cell">
-            <img [src]="img" class="thumb" />
-            <button type="button" class="img-remove" aria-label="Remove image" (click)="removeImageAt(i)">✕</button>
+    <div class="layout">
+      <!-- Sidebar: Important Notes -->
+      <div class="panel">
+        <h2>Important Notes</h2>
+        <div class="panel-body">
+          <div *ngIf="important().length === 0" class="muted">No important notes yet.</div>
+          <div *ngFor="let n of important()" class="note-li" (click)="openViewer(n)">
+            <div style="flex:1;">
+              <h4>{{ n.title || '(No title)' }}</h4>
+              <div class="meta">{{ n.dateISO }}</div>
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- Main: Calendar + selected day notes -->
+      <div class="panel" style="overflow:clip;">
+        <div class="cal-head">
+          <button class="btn" (click)="prevMonth()">‹</button>
+          <h3>{{ monthLabel() }}</h3>
+          <button class="btn" (click)="nextMonth()">›</button>
+        </div>
+
+        <div class="cal-grid">
+          <div class="dow" *ngFor="let d of dows">{{ d }}</div>
+          <ng-container *ngFor="let d of calendarDays()">
+            <div class="day" [class.other]="!d.inMonth" [class.today]="d.isToday"
+              [class.selected]="d.iso === selectedDate()" (click)="selectDate(d.iso)">
+              <div class="date">{{ d.day }}</div>
+              <div *ngIf="hasNotesOn(d.iso)" class="dot"></div>
+            </div>
+          </ng-container>
+        </div>
+
+        <h2 style="padding:0 16px 8px;">{{ selectedDate() }} — Notes</h2>
+        <div class="day-list">
+          <div *ngIf="dayNotes().length===0" class="panel-body" style="color:var(--muted)">No notes on this day.</div>
+          <div *ngFor="let n of dayNotes()" class="note-card">
+            <div class="note-top">
+              <h4>{{ n.title || '(No title)' }}</h4>
+              <div class="meta">{{ n.isImportant ? '⭐ Important' : 'Daily' }} · {{ n.dateISO }}</div>
+            </div>
+            <div [innerHTML]="n.contentHtml"></div>
+            <div *ngIf="n.imageDataUrls?.length"
+              style="margin-top:8px; display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:8px;">
+              <img *ngFor="let img of n.imageDataUrls" [src]="img" class="thumb" />
+            </div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+              <button class="btn" (click)="openViewer(n)">Open</button>
+              <button class="btn" title="Edit" (click)="startEdit(n)">✏️ Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer: Editor -->
+  <div class="drawer" [class.open]="mode() === 'edit'">
+    <div class="drawer-head">
+      <div>{{ editId() ? 'Edit Note' : 'New Note' }}</div>
+      <button class="btn" (click)="closeEditor()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="row">
+        <div>
+          <label>Title</label>
+          <input type="text" [(ngModel)]="title" placeholder="Title">
+        </div>
+        <div>
+          <label>Date</label>
+          <input type="date" [(ngModel)]="dateISO">
+        </div>
+      </div>
 
       <div>
-        <label><input type="checkbox" [(ngModel)]="isImportant"> Mark as Important</label>
+        <label>Rich Text</label>
+        <rich-text-editor [(value)]="contentHtml"></rich-text-editor>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Pictures</label>
+          <input type="file" accept="image/*" multiple (change)="onImages($event)">
+
+          <div *ngIf="imageDataUrls.length" class="image-grid">
+            <div *ngFor="let img of imageDataUrls; let i = index" class="image-cell">
+              <img [src]="img" class="thumb" />
+              <button type="button" class="img-remove" aria-label="Remove image" (click)="removeImageAt(i)">✕</button>
+            </div>
+          </div>
+        </div>
+
+
+        <div>
+          <label><input type="checkbox" [(ngModel)]="isImportant"> Mark as Important</label>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button class="btn" (click)="closeEditor()">Cancel</button>
+      <button class="btn danger" *ngIf="editId()" (click)="remove(editId()!)">Delete</button>
+      <button class="btn primary" (click)="save()">{{ editId() ? 'Update' : 'Save' }}</button>
+    </div>
+  </div>
+
+  <div class="modal" *ngIf="viewerOpen()">
+    <div class="backdrop" (click)="closeViewer()"></div>
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">{{ viewNote()?.title || '(No title)' }}</div>
+          <div class="meta">{{ viewNote()?.isImportant ? '⭐ Important' : 'Daily' }} · {{ viewNote()?.dateISO }}</div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn" title="Edit" (click)="editFromViewer()">✏️</button>
+          <button class="btn" (click)="closeViewer()">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div [innerHTML]="viewNote()?.contentHtml"></div>
+        <div *ngIf="viewNote()?.imageDataUrls?.length"
+          style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:10px;">
+          <img *ngFor="let img of viewNote()?.imageDataUrls; let i = index" [src]="img" class="thumb"
+            (click)="openImageViewer(viewNote()!.imageDataUrls ?? [], i)" />
+        </div>
       </div>
     </div>
   </div>
-  <div class="drawer-foot">
-    <button class="btn" (click)="closeEditor()">Cancel</button>
-    <button class="btn danger" *ngIf="editId()" (click)="remove(editId()!)">Delete</button>
-    <button class="btn primary" (click)="save()">{{ editId() ? 'Update' : 'Save' }}</button>
+
+  <!-- IMAGE LIGHTBOX -->
+  <div class="lightbox" *ngIf="imageViewerOpen()" tabindex="0" (keydown)="onLightboxKey($event)">
+    <div class="lb-backdrop" (click)="closeImageViewer()"></div>
+
+    <div class="lb-content">
+      <button class="lb-btn nav left" (click)="prevImage()">‹</button>
+
+      <div class="lb-stage" (wheel)="onWheel($event)">
+        <img [src]="viewerImages[viewerIndex()]" class="lb-img"
+          [style.transform]="'translate(' + offset().x + 'px,' + offset().y + 'px) scale(' + zoom() + ')'"
+          (mousedown)="startDrag($event)" (mousemove)="drag($event)" (mouseup)="endDrag()" (mouseleave)="endDrag()"
+          (dblclick)="toggleZoom()" draggable="false" />
+      </div>
+
+      <button class="lb-btn nav right" (click)="nextImage()">›</button>
+
+      <div class="lb-toolbar">
+        <span>{{ viewerIndex() + 1 }} / {{ viewerImages.length }}</span>
+        <span style="margin-left:12px;">{{ (zoom()*100) | number:'1.0-0' }}%</span>
+        <div class="spacer"></div>
+        <button class="btn" (click)="zoomOut()">−</button>
+        <button class="btn" (click)="resetZoom()">Reset Zoom</button>
+        <button class="btn" (click)="zoomIn()">+</button>
+        <button class="btn" (click)="closeImageViewer()">✕</button>
+      </div>
+    </div>
   </div>
-</div>
+</ng-template>
 
-<div class="modal" *ngIf="viewerOpen()">
-  <div class="backdrop" (click)="closeViewer()"></div>
-  <div class="modal-card" role="dialog" aria-modal="true">
-    <div class="modal-head">
-      <div>
-        <div class="modal-title">{{ viewNote()?.title || '(No title)' }}</div>
-        <div class="meta">{{ viewNote()?.isImportant ? '⭐ Important' : 'Daily' }} · {{ viewNote()?.dateISO }}</div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn" title="Edit" (click)="editFromViewer()">✏️</button>
-        <button class="btn" (click)="closeViewer()">✕</button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div [innerHTML]="viewNote()?.contentHtml"></div>
-      <div *ngIf="viewNote()?.imageDataUrls?.length"
-        style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:10px;">
-        <img *ngFor="let img of viewNote()?.imageDataUrls; let i = index" [src]="img" class="thumb"
-          (click)="openImageViewer(viewNote()!.imageDataUrls ?? [], i)" />
-      </div>
-    </div>
+<!-- ADMIN PANEL (hidden by default; open via Ctrl+Shift+A) -->
+<div class="admin-panel-backdrop" *ngIf="adminOpen()" (click)="closeAdminPanel()"></div>
+
+<div class="admin-panel" *ngIf="adminOpen()">
+  <div class="admin-head">
+    <h3>Admin — Reset Account Password</h3>
+    <button class="btn" (click)="closeAdminPanel()">✕</button>
   </div>
-</div>
 
-<!-- IMAGE LIGHTBOX -->
-<div class="lightbox" *ngIf="imageViewerOpen()" tabindex="0" (keydown)="onLightboxKey($event)">
-  <div class="lb-backdrop" (click)="closeImageViewer()"></div>
+  <div class="admin-body" style="padding:12px; display:grid; gap:8px;">
+    <label>Account</label>
+    <select [(ngModel)]="adminSelectedAccountId" class="btn" style="width:100%;">
+      <option *ngFor="let a of auth.accounts()" [ngValue]="a.id">{{ a.name }}</option>
+    </select>
 
-  <div class="lb-content">
-    <button class="lb-btn nav left" (click)="prevImage()">‹</button>
+    <label>New password</label>
+    <input type="password" [(ngModel)]="adminNewPassword" class="btn" style="width:100%;" />
 
-    <div class="lb-stage" (wheel)="onWheel($event)">
-      <img [src]="viewerImages[viewerIndex()]" class="lb-img"
-        [style.transform]="'translate(' + offset().x + 'px,' + offset().y + 'px) scale(' + zoom() + ')'"
-        (mousedown)="startDrag($event)" (mousemove)="drag($event)" (mouseup)="endDrag()" (mouseleave)="endDrag()"
-        (dblclick)="toggleZoom()" draggable="false" />
-    </div>
-
-    <button class="lb-btn nav right" (click)="nextImage()">›</button>
-
-    <div class="lb-toolbar">
-      <span>{{ viewerIndex() + 1 }} / {{ viewerImages.length }}</span>
-      <span style="margin-left:12px;">{{ (zoom()*100) | number:'1.0-0' }}%</span>
-      <div class="spacer"></div>
-      <button class="btn" (click)="zoomOut()">−</button>
-      <button class="btn" (click)="resetZoom()">Reset Zoom</button>
-      <button class="btn" (click)="zoomIn()">+</button>
-      <button class="btn" (click)="closeImageViewer()">✕</button>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="btn" (click)="closeAdminPanel()">Cancel</button>
+      <button class="btn primary" (click)="adminResetPassword()">Reset Password</button>
     </div>
   </div>
 </div>

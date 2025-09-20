@@ -1,10 +1,17 @@
-import { Component, computed, effect, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  HostListener,
+  signal,
+} from '@angular/core';
 import { RichTextEditorComponent } from './components/rich-text-editor/rich-text-editor.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Note } from './models/models';
 import { LocalStorageService } from './services/local-storage.service';
 import { ThemeService } from './services/theme.service';
+import { AuthService } from './services/auth.service';
 
 type Tab = 'daily' | 'important';
 type Mode = 'view' | 'edit';
@@ -51,9 +58,73 @@ export class AppComponent {
   private dragStart = { x: 0, y: 0 };
   private offsetStart = { x: 0, y: 0 };
 
-  constructor(private store: LocalStorageService, public theme: ThemeService) {
-    this.notes.set(this.store.get<Note[]>(this.STORAGE_KEY, []));
-    effect(() => this.store.set(this.STORAGE_KEY, this.notes()));
+  newAccName = '';
+  newAccPassword = '';
+  loginPassword = '';
+  loginMode: 'account' | 'master' = 'account';
+  selectedLoginAccountId: string | null = null;
+
+  adminOpen = signal(false);
+  adminSelectedAccountId: string | null = null;
+  adminNewPassword = '';
+
+  constructor(
+    private store: LocalStorageService,
+    public theme: ThemeService,
+    public auth: AuthService
+  ) {
+    // Load notes only after login
+    effect(async () => {
+      const id = this.auth.currentAccountId();
+      if (!id) {
+        this.notes.set([]);
+        return;
+      }
+      const loaded = await this.auth.loadNotes();
+      // Normalize image arrays (in case)
+      this.notes.set(
+        (loaded ?? []).map((n: any) => ({
+          ...n,
+          imageDataUrls: n.imageDataUrls ?? [],
+        }))
+      );
+    });
+
+    // Persist encrypted on every change while logged in
+    effect(() => {
+      if (!this.auth.currentAccountId()) return;
+      this.auth.saveNotes(this.notes()).catch(console.error);
+    });
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(e: KeyboardEvent) {
+    // Ctrl + Shift + A opens the admin panel
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+      this.openAdminPanel();
+    }
+  }
+
+  async registerAccount() {
+    await this.auth.registerAccount(this.newAccName, this.newAccPassword);
+    this.newAccName = '';
+    this.newAccPassword = '';
+  }
+
+  async login() {
+    const id = this.selectedLoginAccountId;
+    if (!id) {
+      alert('Choose an account');
+      return;
+    }
+
+    await this.auth.loginWithAccount(id, this.loginPassword);
+
+    this.loginPassword = '';
+  }
+
+  logout() {
+    this.auth.logout();
   }
 
   /* ---------- Derived sets ---------- */
@@ -339,5 +410,64 @@ export class AppComponent {
   }
   endDrag() {
     this.dragging = false;
+  }
+
+  currentAccount = computed(
+    () =>
+      this.auth.accounts().find((a) => a.id === this.auth.currentAccountId()) ??
+      null
+  );
+
+  async loginWithAccount() {
+    if (!this.selectedLoginAccountId) {
+      alert('Select an account');
+      return;
+    }
+    await this.auth.loginWithAccount(
+      this.selectedLoginAccountId,
+      this.loginPassword
+    );
+    this.loginPassword = '';
+  }
+
+  // Open admin panel (called by shortcut)
+  openAdminPanel() {
+    // quick guard if no accounts
+    if (this.auth.accounts().length === 0) {
+      alert('No accounts to manage');
+      return;
+    }
+    this.adminSelectedAccountId = this.auth.accounts()[0]?.id ?? null;
+    this.adminNewPassword = '';
+    this.adminOpen.set(true);
+    // focus for keyboard events if you want
+    setTimeout(() =>
+      (document.querySelector('.admin-panel') as HTMLElement | null)?.focus()
+    );
+  }
+  closeAdminPanel() {
+    this.adminOpen.set(false);
+  }
+
+  // Trigger password reset
+  async adminResetPassword() {
+    if (!this.adminSelectedAccountId) {
+      alert('Select an account');
+      return;
+    }
+    if (!this.adminNewPassword || this.adminNewPassword.length < 6) {
+      if (!confirm('Password looks short. Proceed anyway?')) return;
+    }
+    try {
+      await this.auth.resetAccountPassword(
+        this.adminSelectedAccountId,
+        this.adminNewPassword
+      );
+      alert('Password reset successfully.');
+      this.closeAdminPanel();
+    } catch (err: any) {
+      console.error(err);
+      alert('Failed to reset password: ' + (err?.message ?? err));
+    }
   }
 }

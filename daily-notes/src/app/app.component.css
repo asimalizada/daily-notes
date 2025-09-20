@@ -414,3 +414,31 @@ label {
   background: var(--panel-2);
   color: var(--text);
 }
+
+.admin-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+.admin-panel {
+  position: fixed;
+  right: 20px;
+  top: 80px;
+  width: 360px;
+  z-index: 210;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-body {
+  padding: 12px;
+}
