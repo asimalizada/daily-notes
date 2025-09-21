@@ -43,13 +43,23 @@
   <div class="wrap">
     <div class="header header-bar">
       <!-- Brand (left) -->
-      <div class="brand">
+      <div class="brand" *ngIf="!isEditingTitle(); else editTitleBlock">
         <img src="assets/logo.png" alt="Logo" class="logo" />
         <div class="brand-title">
           {{ customTitle() || ('APP_TITLE' | translate) }}
           <button class="icon-btn edit" (click)="startEditTitle()" title="{{ 'EDIT' | translate }}">✏️</button>
         </div>
       </div>
+
+      <ng-template #editTitleBlock>
+        <div class="brand editing">
+          <input class="title-input" type="text" [ngModel]="titleInput" (ngModelChange)="titleInput = $event"
+            placeholder="{{ 'APP_TITLE' | translate }}" />
+          <button class="title-edit-btn btn primary" (click)="saveTitle()">💾</button>
+          <button class="title-edit-btn btn" (click)="cancelEditTitle()">❌</button>
+        </div>
+      </ng-template>
+
 
       <!-- Controls (center) -->
       <div class="controls">

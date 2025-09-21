@@ -816,3 +816,28 @@ label {
     padding: 5px 9px;
   }
 }
+
+.brand.editing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.title-input {
+  font-size: 20px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+
+.title-edit-btn {
+  font-size: 14px;
+  padding: 6px 12px;
+}
