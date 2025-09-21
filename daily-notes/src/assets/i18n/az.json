@@ -31,5 +31,15 @@
   "THEME": "Mövzu",
   "SYSTEM": "Sistem",
   "LIGHT": "Açıq",
-  "DARK": "Tünd"
+  "DARK": "Tünd",
+  "UPLOAD_LOGO": "Logo yüklə",
+  "APPEARANCE": "Görünüş",
+  "BRANDING": "Marka",
+  "CUSTOMIZE_COLORS": "Rəngləri özəlləşdir",
+  "CLOSE": "Bağla",
+  "HEADER": "Başlıq",
+  "PRESET_LOGO_PLUS_FAVICON": "Logo və Favicon",
+  "PRESET_LOGO_PLUS_FAVICON_DESCRIPTION": "Bu logolar saytda və faviconda görünəcəkdir.",
+  "UPLOAD_LOGO_DESCRIPTION": "Xüsusi logo istifadə olunanda favicon dəyişməyəcəkdir.",
+  "USE_DEFAULT": "Sıfırla"
 }

@@ -31,5 +31,15 @@
   "THEME": "Tema",
   "SYSTEM": "Sistem",
   "LIGHT": "Açık",
-  "DARK": "Koyu"
+  "DARK": "Koyu",
+  "UPLOAD_LOGO": "Logo yükle",
+  "APPEARANCE": "Görünüş",
+  "BRANDING": "Marka",
+  "CUSTOMIZE_COLORS": "Renkleri özelleştir",
+  "CLOSE": "Kapat",
+  "HEADER": "Başlık",
+  "PRESET_LOGO_PLUS_FAVICON": "Logo ve Favicon",
+  "PRESET_LOGO_PLUS_FAVICON_DESCRIPTION": "Bu logolar sitede ve faviconda kullanılır.",
+  "UPLOAD_LOGO_DESCRIPTION": "Özel logo kullanımı faviconu değiştirmez.",
+  "USE_DEFAULT": "Sıfırla"
 }

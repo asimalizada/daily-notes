@@ -14,6 +14,7 @@ import { ThemeService } from './services/theme.service';
 import { AuthService } from './services/auth.service';
 import { LangService } from './services/lang.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LogoService } from './services/logo.service';
 
 type Tab = 'daily' | 'important';
 type Mode = 'view' | 'edit';
@@ -102,12 +103,20 @@ export class AppComponent {
     accent: '',
   };
 
+  activeAuthTab: 'login' | 'register' = 'login';
+
+  // Header/Settings state
+  settingsOpen = signal(false);
+  settingsTab = signal<'appearance' | 'branding' | 'account'>('appearance');
+  accMenuOpen = false; // simple dropdown toggle
+
   constructor(
     private store: LocalStorageService,
     public theme: ThemeService,
     public auth: AuthService,
     public lang: LangService,
-    public t: TranslateService
+    public t: TranslateService,
+    public logo: LogoService
   ) {
     // Load notes only after login
     effect(async () => {
@@ -554,5 +563,13 @@ export class AppComponent {
     this.theme.resetCustom(kind);
     const p = this.theme.palette();
     this.paletteDraft = { ...p };
+  }
+
+  onLogoUpload(ev: Event) {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.logo.loadCustomFromFile(file).catch(console.error);
+    // Note: favicon will *not* change in custom mode — as requested.
   }
 }

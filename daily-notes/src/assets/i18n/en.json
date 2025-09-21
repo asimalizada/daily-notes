@@ -31,5 +31,15 @@
   "THEME": "Theme",
   "SYSTEM": "System",
   "LIGHT": "Light",
-  "DARK": "Dark"
+  "DARK": "Dark",
+  "UPLOAD_LOGO": "Upload logo",
+  "APPEARANCE": "Appearance",
+  "BRANDING": "Branding",
+  "CUSTOMIZE_COLORS": "Customize colors",
+  "CLOSE": "Close",
+  "HEADER": "Header",
+  "PRESET_LOGO_PLUS_FAVICON": "Preset Logo + Favicon",
+  "PRESET_LOGO_PLUS_FAVICON_DESCRIPTION": "Selecting a preset also updates the favicon.",
+  "UPLOAD_LOGO_DESCRIPTION": "Favicon won’t change when using a custom logo.",
+  "USE_DEFAULT": "Use default"
 }

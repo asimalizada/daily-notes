@@ -1,74 +1,122 @@
-<!-- AUTH GATE -->
+<!-- AUTH GATE (Tabbed) -->
 <div *ngIf="!auth.currentAccountId(); else diaryUi" class="panel" style="max-width:720px; margin:24px auto;">
-  <h2 style="padding:16px;">{{ 'LOGIN' | translate }}</h2>
-  <div class="panel-body" style="display:grid; gap:16px;">
 
-    <!-- Register Account -->
-    <div class="card" style="border:1px solid var(--border); border-radius:12px; padding:12px;">
-      <h3>{{ 'REGISTER_ACCOUNT' | translate }}</h3>
-      <label>{{ 'ACCOUNT_NAME' | translate }}</label>
-      <input type="text" [(ngModel)]="newAccName" class="btn" style="width:100%;"
-        [attr.placeholder]="'ACCOUNT_NAME' | translate">
-      <label>{{ 'PASSWORD' | translate }}</label>
-      <input type="password" [(ngModel)]="newAccPassword" class="btn" style="width:100%;"
-        [attr.placeholder]="'PASSWORD' | translate">
-      <div style="margin-top:8px;">
-        <button class="btn primary" (click)="registerAccount()">{{ 'CREATE_ACCOUNT' | translate }}</button>
-      </div>
+  <!-- Header with logo + language -->
+  <div class="auth-head">
+    <div class="brand">
+      <!-- <img src="assets/logo.png" alt="Logo" class="logo" /> -->
+      <img [src]="logo.logoSrc()" alt="Logo" class="logo" />
+      <h2 class="auth-title">{{ activeAuthTab === 'login' ? ('LOGIN' | translate) : ('REGISTER_ACCOUNT' | translate) }}
+      </h2>
     </div>
 
-    <!-- Login -->
-    <div class="card" style="border:1px solid var(--border); border-radius:12px; padding:12px;">
-      <h3>{{ 'LOGIN' | translate }}</h3>
+    <div class="actions">
+      <label class="lang-label" for="authLang">{{ 'LANGUAGE' | translate }}</label>
+      <select id="authLang" class="btn sm" [ngModel]="lang.lang()" (ngModelChange)="lang.set($event)">
+        <option value="en">ENG</option>
+        <option value="tr">TR</option>
+        <option value="az">AZ</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="auth-tabs">
+    <button class="auth-tab" [class.active]="activeAuthTab === 'login'" (click)="activeAuthTab = 'login'">
+      {{ 'LOGIN' | translate }}
+    </button>
+    <button class="auth-tab" [class.active]="activeAuthTab === 'register'" (click)="activeAuthTab = 'register'">
+      {{ 'REGISTER_ACCOUNT' | translate }}
+    </button>
+  </div>
+
+  <div class="panel-body">
+    <!-- LOGIN TAB -->
+    <div *ngIf="activeAuthTab === 'login'" class="auth-card">
       <label>{{ 'ACCOUNT' | translate }}</label>
       <select class="btn" [(ngModel)]="selectedLoginAccountId" style="width:100%;">
         <option [ngValue]="null" disabled>{{ 'ACCOUNT' | translate }}</option>
         <option *ngFor="let a of auth.accounts()" [ngValue]="a.id">{{ a.name }}</option>
       </select>
 
-      <div *ngIf="loginMode === 'account'">
-        <label>{{ 'PASSWORD' | translate }}</label>
-        <input type="password" [(ngModel)]="loginPassword" class="btn" style="width:100%;"
-          [attr.placeholder]="'PASSWORD' | translate">
-      </div>
+      <label>{{ 'PASSWORD' | translate }}</label>
+      <input type="password" [(ngModel)]="loginPassword" class="btn" style="width:100%;"
+        [attr.placeholder]="'PASSWORD' | translate">
 
-      <div style="margin-top:8px;">
+      <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
         <button class="btn primary" (click)="login()">{{ 'LOGIN' | translate }}</button>
+      </div>
+    </div>
+
+    <!-- REGISTER TAB -->
+    <div *ngIf="activeAuthTab === 'register'" class="auth-card">
+      <label>{{ 'ACCOUNT_NAME' | translate }}</label>
+      <input type="text" [(ngModel)]="newAccName" class="btn" style="width:100%;"
+        [attr.placeholder]="'ACCOUNT_NAME' | translate">
+
+      <label>{{ 'PASSWORD' | translate }}</label>
+      <input type="password" [(ngModel)]="newAccPassword" class="btn" style="width:100%;"
+        [attr.placeholder]="'PASSWORD' | translate">
+
+      <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+        <button class="btn" (click)="activeAuthTab = 'login'">{{ 'CANCEL' | translate }}</button>
+        <button class="btn primary" (click)="registerAccount()">{{ 'CREATE_ACCOUNT' | translate }}</button>
       </div>
     </div>
   </div>
 </div>
 
+
 <ng-template #diaryUi>
   <div class="wrap">
-    <div class="header header-bar">
+    <!-- <div class="header header-bar"> -->
       <!-- Brand (left) -->
-      <div class="brand" *ngIf="!isEditingTitle(); else editTitleBlock">
-        <img src="assets/logo.png" alt="Logo" class="logo" />
+      <!-- <div class="brand" *ngIf="!isEditingTitle(); else editTitleBlock">
+        <img [src]="logo.logoSrc()" alt="Logo" class="logo" />
         <div class="brand-title">
           {{ customTitle() || ('APP_TITLE' | translate) }}
           <button class="icon-btn edit" (click)="startEditTitle()" title="{{ 'EDIT' | translate }}">✏️</button>
         </div>
-      </div>
+      </div> -->
 
-      <ng-template #editTitleBlock>
+      <!-- <ng-template #editTitleBlock>
         <div class="brand editing">
           <input class="title-input" type="text" [ngModel]="titleInput" (ngModelChange)="titleInput = $event"
             placeholder="{{ 'APP_TITLE' | translate }}" />
           <button class="title-edit-btn btn primary" (click)="saveTitle()">💾</button>
           <button class="title-edit-btn btn" (click)="cancelEditTitle()">❌</button>
         </div>
-      </ng-template>
+      </ng-template> -->
 
 
       <!-- Controls (center) -->
-      <div class="controls">
+      <!-- <div class="controls">
         <select class="control" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
           <option value="system">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
           <option value="custom">Custom</option>
+        </select> -->
+
+        <!-- Logo picker -->
+        <!-- <select class="btn" [ngModel]="logo.preset()" (ngModelChange)="logo.setPreset($event)"
+          [disabled]="logo.mode() === 'custom'">
+          <option value="logo1">Halka</option>
+          <option value="logo2">Işık</option>
+          <option value="logo3">Tasavvuf</option>
+          <option value="logo4">Tesbih</option>
         </select>
+
+        <label class="btn" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+          <span>{{ 'UPLOAD_LOGO' | translate }}</span>
+          <input type="file" accept="image/*" (change)="onLogoUpload($event)" style="display:none;">
+          <img [src]="logo.logoSrc()" alt="" style="height:24px; width:auto; margin-left:6px; border-radius:4px;">
+        </label> -->
+
+        <!-- Optional: quick toggle back to preset mode -->
+        <!-- <button class="btn" *ngIf="logo.mode() === 'custom'" (click)="logo.setPreset(logo.preset())">
+          Use Preset + Favicon
+        </button>
 
         <button class="control icon" title="Customize colors" (click)="openThemeEditor()">🎨</button>
 
@@ -79,12 +127,52 @@
         </select>
 
         <button class="btn primary big" (click)="newNote()">{{ 'NEW_NOTE' | translate }}</button>
-      </div>
+      </div> -->
 
       <!-- Account (right) -->
-      <div class="account" *ngIf="auth.currentAccountId()">
+      <!-- <div class="account" *ngIf="auth.currentAccountId()">
         <span class="badge">{{ currentAccount()?.name }}</span>
         <button class="control icon danger" (click)="logout()" title="{{ 'LOG_OUT' | translate }}">⏏</button>
+      </div>
+    </div> -->
+
+    <div class="header-bar">
+      <!-- Brand (left) -->
+      <div class="brand" *ngIf="!isEditingTitle(); else editTitleBlock">
+        <img [src]="logo.logoSrc()" alt="Logo" class="logo" />
+        <div class="brand-title">
+          {{ customTitle() || ('APP_TITLE' | translate) }}
+          <!-- <button class="icon-btn edit" (click)="startEditTitle()" title="{{ 'EDIT' | translate }}">✏️</button> -->
+        </div>
+      </div>
+
+      <!-- Title edit inline -->
+      <ng-template #editTitleBlock>
+        <!-- <div class="brand editing">
+          <input class="title-input" type="text" [ngModel]="titleInput" (ngModelChange)="titleInput = $event"
+            placeholder="{{ 'APP_TITLE' | translate }}" />
+          <button class="title-edit-btn btn primary" (click)="saveTitle()">💾</button>
+          <button class="title-edit-btn btn" (click)="cancelEditTitle()">❌</button>
+        </div> -->
+      </ng-template>
+
+      <!-- Actions (right) -->
+      <div class="header-actions">
+        <!-- New Note (text on desktop, icon on mobile) -->
+        <button class="btn primary hide-sm" (click)="newNote()">{{ 'NEW_NOTE' | translate }}</button>
+        <button class="icon-btn show-sm" (click)="newNote()" aria-label="New Note">＋</button>
+
+        <!-- Settings (gear) opens modal -->
+        <button class="icon-btn" (click)="settingsOpen.set(true)" aria-label="Settings">⚙️</button>
+
+        <!-- Account mini-menu -->
+        <div class="account-menu" (click)="accMenuOpen = !accMenuOpen">
+          <span class="badge">{{ currentAccount()?.name }}</span>
+          <div class="menu" *ngIf="accMenuOpen">
+            <button class="menu-item" (click)="openAdminPanel(); accMenuOpen=false">Admin</button>
+            <button class="menu-item" (click)="logout(); accMenuOpen=false">{{ 'LOG_OUT' | translate }}</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -332,6 +420,116 @@
         style="display:flex; gap:8px; justify-content:flex-end; padding:12px 16px; border-top:1px solid var(--border);">
         <button class="btn" (click)="closeThemeEditor()">Cancel</button>
         <button class="btn primary" (click)="saveTheme()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal" *ngIf="settingsOpen()">
+    <div class="backdrop" (click)="settingsOpen.set(false)"></div>
+    <div class="modal-card" style="max-width:720px;">
+      <div class="modal-head">
+        <div class="tabs">
+          <button class="tab" [class.active]="settingsTab() === 'appearance'" (click)="settingsTab.set('appearance')">
+            {{ 'APPEARANCE' | translate }}
+          </button>
+          <button class="tab" [class.active]="settingsTab() === 'branding'" (click)="settingsTab.set('branding')">
+            {{ 'BRANDING' | translate }}
+          </button>
+          <button class="tab" [class.active]="settingsTab() === 'account'" (click)="settingsTab.set('account')">
+            {{ 'ACCOUNT' | translate }}
+          </button>
+        </div>
+        <button class="btn" (click)="settingsOpen.set(false)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <ng-container [ngSwitch]="settingsTab()">
+
+          <!-- APPEARANCE -->
+          <div *ngSwitchCase="'appearance'" class="settings-grid">
+            <div class="field">
+              <label>{{ 'THEME' | translate }}</label>
+              <select class="btn" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>{{ 'LANGUAGE' | translate }}</label>
+              <select class="btn" [ngModel]="lang.lang()" (ngModelChange)="lang.set($event)">
+                <option value="en">ENG</option>
+                <option value="tr">TR</option>
+                <option value="az">AZ</option>
+              </select>
+            </div>
+
+            <div class="field row">
+              <button class="btn" (click)="openThemeEditor()">🎨 {{ 'CUSTOMIZE_COLORS' | translate }}</button>
+            </div>
+          </div>
+
+          <!-- BRANDING -->
+          <div *ngSwitchCase="'branding'" class="settings-grid">
+            <div class="field">
+              <label>{{ 'TITLE' | translate }}</label>
+              <input class="btn" [ngModel]="titleInput" (ngModelChange)="titleInput=$event" />
+              <div style="display:flex; gap:8px; margin-top:6px;">
+                <button class="btn primary" (click)="saveTitle()">💾 {{ 'SAVE' | translate }}</button>
+                <button class="btn" (click)="cancelEditTitle()">{{ 'CANCEL' | translate }}</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>{{ 'PRESET_LOGO_PLUS_FAVICON' | translate }}</label>
+              <select class="btn" [ngModel]="logo.preset()" (ngModelChange)="logo.setPreset($event)"
+                [disabled]="logo.mode() === 'custom'">
+                <option value="logo1">Halka</option>
+                <option value="logo2">Işık</option>
+                <option value="logo3">Tasavvuf</option>
+                <option value="logo4">Tesbih</option>
+              </select>
+              <div class="hint">{{ 'PRESET_LOGO_PLUS_FAVICON_DESCRIPTION' | translate }}</div>
+              <div class="preview">
+                <img [src]="logo.logoSrc()" class="logo-preview" alt="preview" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label>{{ 'UPLOAD_LOGO' | translate }}</label>
+              <label class="btn" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                <span>{{ 'UPLOAD_LOGO' | translate }}</span>
+                <input type="file" accept="image/*" (change)="onLogoUpload($event)" style="display:none;">
+              </label>
+              <div class="hint">{{ 'UPLOAD_LOGO_DESCRIPTION' | translate }}</div>
+            </div>
+
+            <div class="field row" *ngIf="logo.mode() === 'custom'">
+              <button class="btn" (click)="logo.setPreset(logo.preset())">{{ 'PRESET_LOGO_PLUS_FAVICON' | translate }}</button>
+            </div>
+          </div>
+
+          <!-- ACCOUNT -->
+          <div *ngSwitchCase="'account'" class="settings-grid">
+            <div class="field">
+              <label>{{ 'ACCOUNT_NAME' | translate }}</label>
+              <div class="btn" style="cursor:default">{{ currentAccount()?.name }}</div>
+            </div>
+
+            <div class="field row">
+              <button class="btn danger" (click)="logout()">{{ 'LOG_OUT' | translate }}</button>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+
+      <div class="modal-foot"
+        style="display:flex; gap:8px; justify-content:flex-end; padding:12px 16px; border-top:1px solid var(--border);">
+        <button class="btn" (click)="settingsOpen.set(false)">{{ 'CLOSE' | translate }}</button>
       </div>
     </div>
   </div>
