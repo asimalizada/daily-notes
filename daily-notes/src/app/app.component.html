@@ -41,47 +41,43 @@
 
 <ng-template #diaryUi>
   <div class="wrap">
-    <div class="header">
-      <!-- <div class="title">{{ 'APP_TITLE' | translate }}</div> -->
-      <!-- Title: view mode -->
-      <div class="title" *ngIf="!isEditingTitle()" style="display:flex; align-items:center; gap:8px;">
-        <!-- Logo -->
-        <img src="assets/logo.png" alt="Logo" style="height:32px; width:auto; border-radius:6px;" />
-
-        <!-- App title -->
-        {{ customTitle() || ('APP_TITLE' | translate) }}
-        <button class="icon-btn" (click)="startEditTitle()" title="{{ 'EDIT' | translate }}">✏️</button>
+    <div class="header header-bar">
+      <!-- Brand (left) -->
+      <div class="brand">
+        <img src="assets/logo.png" alt="Logo" class="logo" />
+        <div class="brand-title">
+          {{ customTitle() || ('APP_TITLE' | translate) }}
+          <button class="icon-btn edit" (click)="startEditTitle()" title="{{ 'EDIT' | translate }}">✏️</button>
+        </div>
       </div>
 
-      <!-- Title: edit mode -->
-      <div class="title" *ngIf="isEditingTitle()" style="display:flex; align-items:center; gap:8px;">
-        <input class="btn" type="text" [ngModel]="titleInput" (ngModelChange)="titleInput = $event"
-          style="font-size:22px; font-weight:700; width: min(420px, 60vw);" />
-        <button class="title-edit-btn btn primary" (click)="saveTitle()">{{ 'SAVE' | translate }}</button>
-        <button class="title-edit-btn btn" (click)="cancelEditTitle()">{{ 'CANCEL' | translate }}</button>
-      </div>
-
-      <div class="header-actions">
-        <select class="btn" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
+      <!-- Controls (center) -->
+      <div class="controls">
+        <select class="control" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
           <option value="system">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
           <option value="custom">Custom</option>
         </select>
-        <button class="btn" title="Customize colors" (click)="openThemeEditor()">🎨</button>
-        <select class="btn" [ngModel]="lang.lang()" (ngModelChange)="lang.set($event)">
+
+        <button class="control icon" title="Customize colors" (click)="openThemeEditor()">🎨</button>
+
+        <select class="control" [ngModel]="lang.lang()" (ngModelChange)="lang.set($event)">
           <option value="en">ENG</option>
           <option value="tr">TR</option>
           <option value="az">AZ</option>
         </select>
-        <button class="btn primary" (click)="newNote()">{{ 'NEW_NOTE' | translate }}</button>
-        <span *ngIf="auth.currentAccountId()" class="meta">
-          {{ 'ACCOUNT_NAME' | translate }}: {{ currentAccount()?.name }}
-        </span>
-        <button class="btn" *ngIf="auth.currentAccountId()" (click)="logout()">{{ 'LOG_OUT' | translate }}</button>
 
+        <button class="btn primary big" (click)="newNote()">{{ 'NEW_NOTE' | translate }}</button>
+      </div>
+
+      <!-- Account (right) -->
+      <div class="account" *ngIf="auth.currentAccountId()">
+        <span class="badge">{{ currentAccount()?.name }}</span>
+        <button class="control icon danger" (click)="logout()" title="{{ 'LOG_OUT' | translate }}">⏏</button>
       </div>
     </div>
+
 
     <div class="layout">
       <!-- Sidebar: Important Notes -->

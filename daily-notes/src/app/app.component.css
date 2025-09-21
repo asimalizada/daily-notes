@@ -505,3 +505,314 @@ label {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
 }
+
+/* ===== Mobile layout & sizing tweaks ===== */
+
+/* Tablets and down */
+@media (max-width: 980px) {
+  .wrap {
+    padding: 16px;
+  }
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .header {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .header-actions .btn {
+    padding: 6px 10px;
+  }
+
+  .title {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+  .title img {
+    height: 28px !important;
+  }
+
+  .panel {
+    border-radius: 14px;
+  }
+  .panel h2 {
+    padding: 12px;
+    font-size: 13px;
+  }
+  .panel-body {
+    padding: 12px;
+  }
+
+  .cal-head {
+    padding: 10px 12px;
+  }
+  .cal-head h3 {
+    font-size: 15px;
+  }
+
+  .cal-grid {
+    gap: 6px;
+    padding: 0 12px 12px;
+  }
+  .dow {
+    font-size: 11px;
+    padding-bottom: 4px;
+  }
+
+  /* Square days on mobile-like grids */
+  .day {
+    min-height: auto;
+    aspect-ratio: 1 / 1;
+    padding: 6px;
+    border-radius: 10px;
+  }
+  .day .date {
+    font-size: 11px;
+  }
+
+  /* Day list + cards */
+  .day-list {
+    padding: 0 12px 12px;
+    gap: 10px;
+  }
+  .note-card {
+    border-radius: 12px;
+    padding: 10px;
+  }
+  .note-top h4 {
+    font-size: 15px;
+  }
+  .note-top .meta {
+    font-size: 11px;
+  }
+
+  /* Image grids smaller on mobile */
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 6px;
+  }
+  .thumb {
+    height: 110px;
+  }
+
+  /* Inputs in rows */
+  .row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .row input[type="text"],
+  .row input[type="date"] {
+    padding: 9px;
+  }
+
+  /* Drawer & modal full width/height */
+  .drawer {
+    width: 100%;
+  }
+  .modal-card {
+    width: 96vw;
+    max-height: 90vh;
+    border-radius: 14px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 600px) {
+  .wrap {
+    padding: 12px;
+  }
+  .title {
+    font-size: 18px;
+  }
+  .title img {
+    height: 24px !important;
+  }
+
+  .btn {
+    padding: 7px 10px;
+    border-radius: 9px;
+  }
+  .btn.primary {
+    /* keep readable contrast */
+  }
+
+  .cal-head h3 {
+    font-size: 14px;
+  }
+  .cal-grid {
+    gap: 5px;
+  }
+  .day {
+    padding: 5px;
+    border-radius: 9px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    right: 6px;
+    bottom: 6px;
+  }
+
+  /* Lightbox controls bigger touch targets */
+  .lb-btn {
+    padding: 8px 12px;
+    font-size: 22px;
+    border-radius: 10px;
+  }
+  .lb-toolbar {
+    gap: 6px;
+    padding: 6px 10px;
+  }
+  .lb-toolbar .btn {
+    padding: 5px 9px;
+  }
+}
+
+/* Prevent header overflow: title truncates gracefully on tiny screens */
+.header .title {
+  max-width: 70vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Header bar layout ===== */
+.header-bar {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0; /* allow title to truncate */
+}
+.logo {
+  height: 28px;
+  width: 28px;
+  border-radius: 6px;
+  flex: none;
+}
+.brand-title {
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.icon-btn.edit {
+  padding: 4px 8px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.control {
+  height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.control.icon {
+  width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  padding: 0;
+}
+.control.icon.danger {
+  color: #fff;
+  background: #e36d6d;
+  border-color: transparent;
+}
+
+.btn.big {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 12px;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 40vw;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Mobile stacking (keeps everything neat) ===== */
+@media (max-width: 980px) {
+  .header-bar {
+    grid-template:
+      "brand account" auto
+      "controls controls" auto /
+      1fr auto;
+    row-gap: 10px;
+  }
+  .brand {
+    grid-area: brand;
+  }
+  .controls {
+    grid-area: controls;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .account {
+    grid-area: account;
+  }
+  .logo {
+    height: 24px;
+    width: 24px;
+  }
+  .brand-title {
+    font-size: 18px;
+    max-width: 60vw;
+  }
+  .control,
+  .btn.big {
+    height: 34px;
+  }
+}
+
+/* Ultra small phones */
+@media (max-width: 600px) {
+  .controls {
+    gap: 6px;
+  }
+  .btn.big {
+    padding: 0 12px;
+  }
+  .badge {
+    padding: 5px 9px;
+  }
+}
