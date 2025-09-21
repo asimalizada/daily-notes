@@ -1,36 +1,36 @@
 <!-- AUTH GATE -->
 <div *ngIf="!auth.currentAccountId(); else diaryUi" class="panel" style="max-width:720px; margin:24px auto;">
-  <h2 style="padding:16px;">Sign in</h2>
+  <h2 style="padding:16px;">{{ 'LOGIN' | translate }}</h2>
   <div class="panel-body" style="display:grid; gap:16px;">
 
     <!-- Register Account -->
     <div class="card" style="border:1px solid var(--border); border-radius:12px; padding:12px;">
-      <h3>Register Account</h3>
-      <label>Account Name</label>
-      <input type="text" [(ngModel)]="newAccName" class="btn" style="width:100%;">
-      <label>Password</label>
-      <input type="password" [(ngModel)]="newAccPassword" class="btn" style="width:100%;">
+      <h3>{{ 'REGISTER_ACCOUNT' | translate }}</h3>
+      <label>{{ 'ACCOUNT_NAME' | translate }}</label>
+      <input type="text" [(ngModel)]="newAccName" class="btn" style="width:100%;" [attr.placeholder]="'ACCOUNT_NAME' | translate">
+      <label>{{ 'PASSWORD' | translate }}</label>
+      <input type="password" [(ngModel)]="newAccPassword" class="btn" style="width:100%;" [attr.placeholder]="'PASSWORD' | translate">
       <div style="margin-top:8px;">
-        <button class="btn primary" (click)="registerAccount()">Create Account</button>
+        <button class="btn primary" (click)="registerAccount()">{{ 'CREATE_ACCOUNT' | translate }}</button>
       </div>
     </div>
 
     <!-- Login -->
     <div class="card" style="border:1px solid var(--border); border-radius:12px; padding:12px;">
-      <h3>Login</h3>
-      <label>Account</label>
+      <h3>{{ 'LOGIN' | translate }}</h3>
+      <label>{{ 'ACCOUNT' | translate }}</label>
       <select class="btn" [(ngModel)]="selectedLoginAccountId" style="width:100%;">
-        <option [ngValue]="null" disabled>Select…</option>
+        <option [ngValue]="null" disabled>{{ 'ACCOUNT' | translate }}</option>
         <option *ngFor="let a of auth.accounts()" [ngValue]="a.id">{{ a.name }}</option>
       </select>
 
       <div *ngIf="loginMode === 'account'">
-        <label>Password</label>
-        <input type="password" [(ngModel)]="loginPassword" class="btn" style="width:100%;">
+        <label>{{ 'PASSWORD' | translate }}</label>
+        <input type="password" [(ngModel)]="loginPassword" class="btn" style="width:100%;" [attr.placeholder]="'PASSWORD' | translate">
       </div>
 
       <div style="margin-top:8px;">
-        <button class="btn primary" (click)="login()">Login</button>
+        <button class="btn primary" (click)="login()">{{ 'LOGIN' | translate }}</button>
       </div>
     </div>
   </div>
@@ -39,14 +39,19 @@
 <ng-template #diaryUi>
   <div class="wrap">
     <div class="header">
-      <div class="title">Angular Diary</div>
+      <div class="title">{{ 'APP_TITLE' | translate }}</div>
       <div class="header-actions">
         <select class="btn" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
           <option value="system">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
         </select>
-        <button class="btn primary" (click)="newNote()">New Note</button>
+        <select class="btn" [ngModel]="lang.lang()" (ngModelChange)="lang.set($event)">
+          <option value="en">ENG</option>
+          <option value="tr">TR</option>
+          <option value="az">AZ</option>
+        </select>
+        <button class="btn primary" (click)="newNote()">{{ 'NEW_NOTE' | translate }}</button>
         <span *ngIf="auth.currentAccountId()" class="meta">
           Account: {{ currentAccount()?.name }}
         </span>
@@ -58,9 +63,9 @@
     <div class="layout">
       <!-- Sidebar: Important Notes -->
       <div class="panel">
-        <h2>Important Notes</h2>
+        <h2>{{ 'IMPORTANT_NOTES' | translate }}</h2>
         <div class="panel-body">
-          <div *ngIf="important().length === 0" class="muted">No important notes yet.</div>
+          <div *ngIf="important().length === 0" class="muted">{{ 'NO_IMPORTANT' | translate }}</div>
           <div *ngFor="let n of important()" class="note-li" (click)="openViewer(n)">
             <div style="flex:1;">
               <h4>{{ n.title || '(No title)' }}</h4>
@@ -79,7 +84,7 @@
         </div>
 
         <div class="cal-grid">
-          <div class="dow" *ngFor="let d of dows">{{ d }}</div>
+          <div class="dow" *ngFor="let d of dows()">{{ d }}</div>
           <ng-container *ngFor="let d of calendarDays()">
             <div class="day" [class.other]="!d.inMonth" [class.today]="d.isToday"
               [class.selected]="d.iso === selectedDate()" (click)="selectDate(d.iso)">
@@ -89,7 +94,7 @@
           </ng-container>
         </div>
 
-        <h2 style="padding:0 16px 8px;">{{ selectedDate() }} — Notes</h2>
+        <h2 style="padding:0 16px 8px;">{{ 'NOTES_FOR' | translate:{ date: selectedDate() } }}</h2>
         <div class="day-list">
           <div *ngIf="dayNotes().length===0" class="panel-body" style="color:var(--muted)">No notes on this day.</div>
           <div *ngFor="let n of dayNotes()" class="note-card">
@@ -103,8 +108,8 @@
               <img *ngFor="let img of n.imageDataUrls" [src]="img" class="thumb" />
             </div>
             <div style="margin-top:8px; display:flex; gap:8px;">
-              <button class="btn" (click)="openViewer(n)">Open</button>
-              <button class="btn" title="Edit" (click)="startEdit(n)">✏️ Edit</button>
+              <button class="btn" (click)="openViewer(n)">{{ 'OPEN' | translate }}</button>
+              <button class="btn" title="Edit" (click)="startEdit(n)">✏️ {{ 'EDIT' | translate }}</button>
             </div>
           </div>
         </div>
@@ -121,23 +126,23 @@
     <div class="drawer-body">
       <div class="row">
         <div>
-          <label>Title</label>
+          <label>{{ 'TITLE' | translate }}</label>
           <input type="text" [(ngModel)]="title" placeholder="Title">
         </div>
         <div>
-          <label>Date</label>
+          <label>{{ 'DATE' | translate }}</label>
           <input type="date" [(ngModel)]="dateISO">
         </div>
       </div>
 
       <div>
-        <label>Rich Text</label>
+        <label>{{ 'RICH_TEXT' | translate }}</label>
         <rich-text-editor [(value)]="contentHtml"></rich-text-editor>
       </div>
 
       <div class="row">
         <div>
-          <label>Pictures</label>
+          <label>{{ 'PICTURES' | translate }}</label>
           <input type="file" accept="image/*" multiple (change)="onImages($event)">
 
           <div *ngIf="imageDataUrls.length" class="image-grid">
@@ -150,14 +155,14 @@
 
 
         <div>
-          <label><input type="checkbox" [(ngModel)]="isImportant"> Mark as Important</label>
+          <label><input type="checkbox" [(ngModel)]="isImportant"> {{ 'MARK_IMPORTANT' | translate }}</label>
         </div>
       </div>
     </div>
     <div class="drawer-foot">
-      <button class="btn" (click)="closeEditor()">Cancel</button>
-      <button class="btn danger" *ngIf="editId()" (click)="remove(editId()!)">Delete</button>
-      <button class="btn primary" (click)="save()">{{ editId() ? 'Update' : 'Save' }}</button>
+      <button class="btn" (click)="closeEditor()">{{ 'CANCEL' | translate }}</button>
+      <button class="btn danger" *ngIf="editId()" (click)="remove(editId()!)">{{ 'DELETE' | translate }}</button>
+      <button class="btn primary" (click)="save()">{{ (editId() ? 'UPDATE' : 'SAVE') | translate }}</button>
     </div>
   </div>
 

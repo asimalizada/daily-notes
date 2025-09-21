@@ -12,6 +12,8 @@ import { Note } from './models/models';
 import { LocalStorageService } from './services/local-storage.service';
 import { ThemeService } from './services/theme.service';
 import { AuthService } from './services/auth.service';
+import { LangService } from './services/lang.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 type Tab = 'daily' | 'important';
 type Mode = 'view' | 'edit';
@@ -19,12 +21,20 @@ type Mode = 'view' | 'edit';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, RichTextEditorComponent],
+  imports: [CommonModule, FormsModule, RichTextEditorComponent, TranslateModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  dows = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  dows = computed(() => [
+    this.t.instant('MON'),
+    this.t.instant('TUE'),
+    this.t.instant('WED'),
+    this.t.instant('THU'),
+    this.t.instant('FRI'),
+    this.t.instant('SAT'),
+    this.t.instant('SUN'),
+  ]);
 
   // storage
   private readonly STORAGE_KEY = 'angular_diary_notes_v1';
@@ -71,7 +81,9 @@ export class AppComponent {
   constructor(
     private store: LocalStorageService,
     public theme: ThemeService,
-    public auth: AuthService
+    public auth: AuthService,
+    public lang: LangService,
+    public t: TranslateService
   ) {
     // Load notes only after login
     effect(async () => {
@@ -147,7 +159,7 @@ export class AppComponent {
   /* ---------- Calendar helpers ---------- */
   monthLabel = computed(() => {
     const d = new Date(this.viewYear(), this.viewMonth(), 1);
-    return d.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+    return d.toLocaleString(this.lang.lang(), { month: 'long', year: 'numeric' });
   });
 
   calendarDays = computed(() => {
