@@ -7,9 +7,11 @@
     <div class="card" style="border:1px solid var(--border); border-radius:12px; padding:12px;">
       <h3>{{ 'REGISTER_ACCOUNT' | translate }}</h3>
       <label>{{ 'ACCOUNT_NAME' | translate }}</label>
-      <input type="text" [(ngModel)]="newAccName" class="btn" style="width:100%;" [attr.placeholder]="'ACCOUNT_NAME' | translate">
+      <input type="text" [(ngModel)]="newAccName" class="btn" style="width:100%;"
+        [attr.placeholder]="'ACCOUNT_NAME' | translate">
       <label>{{ 'PASSWORD' | translate }}</label>
-      <input type="password" [(ngModel)]="newAccPassword" class="btn" style="width:100%;" [attr.placeholder]="'PASSWORD' | translate">
+      <input type="password" [(ngModel)]="newAccPassword" class="btn" style="width:100%;"
+        [attr.placeholder]="'PASSWORD' | translate">
       <div style="margin-top:8px;">
         <button class="btn primary" (click)="registerAccount()">{{ 'CREATE_ACCOUNT' | translate }}</button>
       </div>
@@ -26,7 +28,8 @@
 
       <div *ngIf="loginMode === 'account'">
         <label>{{ 'PASSWORD' | translate }}</label>
-        <input type="password" [(ngModel)]="loginPassword" class="btn" style="width:100%;" [attr.placeholder]="'PASSWORD' | translate">
+        <input type="password" [(ngModel)]="loginPassword" class="btn" style="width:100%;"
+          [attr.placeholder]="'PASSWORD' | translate">
       </div>
 
       <div style="margin-top:8px;">
@@ -39,13 +42,33 @@
 <ng-template #diaryUi>
   <div class="wrap">
     <div class="header">
-      <div class="title">{{ 'APP_TITLE' | translate }}</div>
+      <!-- <div class="title">{{ 'APP_TITLE' | translate }}</div> -->
+      <!-- Title: view mode -->
+      <div class="title" *ngIf="!isEditingTitle()" style="display:flex; align-items:center; gap:8px;">
+        <!-- Logo -->
+        <img src="assets/logo.png" alt="Logo" style="height:32px; width:auto; border-radius:6px;" />
+
+        <!-- App title -->
+        {{ customTitle() || ('APP_TITLE' | translate) }}
+        <button class="icon-btn" (click)="startEditTitle()" title="{{ 'EDIT' | translate }}">✏️</button>
+      </div>
+
+      <!-- Title: edit mode -->
+      <div class="title" *ngIf="isEditingTitle()" style="display:flex; align-items:center; gap:8px;">
+        <input class="btn" type="text" [ngModel]="titleInput" (ngModelChange)="titleInput = $event"
+          style="font-size:22px; font-weight:700; width: min(420px, 60vw);" />
+        <button class="title-edit-btn btn primary" (click)="saveTitle()">{{ 'SAVE' | translate }}</button>
+        <button class="title-edit-btn btn" (click)="cancelEditTitle()">{{ 'CANCEL' | translate }}</button>
+      </div>
+
       <div class="header-actions">
         <select class="btn" [ngModel]="theme.theme()" (ngModelChange)="theme.set($event)">
           <option value="system">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
+          <option value="custom">Custom</option>
         </select>
+        <button class="btn" title="Customize colors" (click)="openThemeEditor()">🎨</button>
         <select class="btn" [ngModel]="lang.lang()" (ngModelChange)="lang.set($event)">
           <option value="en">ENG</option>
           <option value="tr">TR</option>
@@ -53,9 +76,9 @@
         </select>
         <button class="btn primary" (click)="newNote()">{{ 'NEW_NOTE' | translate }}</button>
         <span *ngIf="auth.currentAccountId()" class="meta">
-          Account: {{ currentAccount()?.name }}
+          {{ 'ACCOUNT_NAME' | translate }}: {{ currentAccount()?.name }}
         </span>
-        <button class="btn" *ngIf="auth.currentAccountId()" (click)="logout()">Log out</button>
+        <button class="btn" *ngIf="auth.currentAccountId()" (click)="logout()">{{ 'LOG_OUT' | translate }}</button>
 
       </div>
     </div>
@@ -96,11 +119,12 @@
 
         <h2 style="padding:0 16px 8px;">{{ 'NOTES_FOR' | translate:{ date: selectedDate() } }}</h2>
         <div class="day-list">
-          <div *ngIf="dayNotes().length===0" class="panel-body" style="color:var(--muted)">No notes on this day.</div>
+          <div *ngIf="dayNotes().length===0" class="panel-body" style="color:var(--muted)">{{ 'NO_NOTES_DAY' | translate
+            }}</div>
           <div *ngFor="let n of dayNotes()" class="note-card">
             <div class="note-top">
               <h4>{{ n.title || '(No title)' }}</h4>
-              <div class="meta">{{ n.isImportant ? '⭐ Important' : 'Daily' }} · {{ n.dateISO }}</div>
+              <div class="meta">{{ (n.isImportant ? 'IMPORTANT' : 'DAILY') | translate }} · {{ n.dateISO }}</div>
             </div>
             <div [innerHTML]="n.contentHtml"></div>
             <div *ngIf="n.imageDataUrls?.length"
@@ -109,7 +133,7 @@
             </div>
             <div style="margin-top:8px; display:flex; gap:8px;">
               <button class="btn" (click)="openViewer(n)">{{ 'OPEN' | translate }}</button>
-              <button class="btn" title="Edit" (click)="startEdit(n)">✏️ {{ 'EDIT' | translate }}</button>
+              <button class="btn" title="Edit" (click)="startEdit(n)">✏️</button>
             </div>
           </div>
         </div>
@@ -120,7 +144,7 @@
   <!-- Drawer: Editor -->
   <div class="drawer" [class.open]="mode() === 'edit'">
     <div class="drawer-head">
-      <div>{{ editId() ? 'Edit Note' : 'New Note' }}</div>
+      <div>{{ (editId() ? 'EDIT' : 'NEW_NOTE') | translate }}</div>
       <button class="btn" (click)="closeEditor()">✕</button>
     </div>
     <div class="drawer-body">
@@ -217,6 +241,95 @@
       </div>
     </div>
   </div>
+
+  <!-- THEME EDITOR -->
+  <div class="modal" *ngIf="themeEditorOpen()">
+    <div class="backdrop" (click)="closeThemeEditor()"></div>
+    <div class="modal-card" style="max-width:720px;">
+      <div class="modal-head">
+        <div class="modal-title">Theme — Custom Colors</div>
+        <div class="modal-actions">
+          <button class="btn" (click)="resetTheme('light')">Light defaults</button>
+          <button class="btn" (click)="resetTheme('dark')">Dark defaults</button>
+          <button class="btn" (click)="closeThemeEditor()">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="row" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="color-row">
+            <label>Background</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.bg" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.bg" />
+            </div>
+          </div>
+
+          <div class="color-row">
+            <label>Panel</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.panel" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.panel" />
+            </div>
+          </div>
+
+          <div class="color-row">
+            <label>Panel (inner)</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.panel2" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.panel2" />
+            </div>
+          </div>
+
+          <div class="color-row">
+            <label>Border</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.border" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.border" />
+            </div>
+          </div>
+
+          <div class="color-row">
+            <label>Text</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.text" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.text" />
+            </div>
+          </div>
+
+          <div class="color-row">
+            <label>Muted</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.muted" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.muted" />
+            </div>
+          </div>
+
+          <div class="color-row">
+            <label>Primary</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.primary" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.primary" />
+            </div>
+          </div>
+
+          <div class="color-row">
+            <label>Accent</label>
+            <div class="pick">
+              <input type="color" class="colorbox" [(ngModel)]="paletteDraft.accent" />
+              <input type="text" class="hex" [(ngModel)]="paletteDraft.accent" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="modal-foot"
+        style="display:flex; gap:8px; justify-content:flex-end; padding:12px 16px; border-top:1px solid var(--border);">
+        <button class="btn" (click)="closeThemeEditor()">Cancel</button>
+        <button class="btn primary" (click)="saveTheme()">Save</button>
+      </div>
+    </div>
+  </div>
+
 </ng-template>
 
 <!-- ADMIN PANEL (hidden by default; open via Ctrl+Shift+A) -->

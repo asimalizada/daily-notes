@@ -442,3 +442,66 @@ label {
 .admin-body {
   padding: 12px;
 }
+
+.icon-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+  cursor: pointer;
+  line-height: 1;
+  font-size: 15px;
+}
+.icon-btn:hover {
+  filter: brightness(1.05);
+}
+
+.title-edit-btn {
+  font-size: 15px;
+}
+
+.color-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+  align-items: center;
+}
+.pick {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* native color input with visible swatch (avoid .btn styles) */
+.colorbox {
+  width: 48px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.colorbox::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.colorbox::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+.colorbox::-moz-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+/* hex text input */
+.hex {
+  width: 120px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}

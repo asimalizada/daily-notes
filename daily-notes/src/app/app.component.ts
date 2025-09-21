@@ -21,7 +21,12 @@ type Mode = 'view' | 'edit';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, RichTextEditorComponent, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RichTextEditorComponent,
+    TranslateModule,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -78,6 +83,25 @@ export class AppComponent {
   adminSelectedAccountId: string | null = null;
   adminNewPassword = '';
 
+  // --- Title editing state ---
+  private readonly TITLE_KEY = 'diary_custom_title';
+  customTitle = signal<string>(localStorage.getItem(this.TITLE_KEY) ?? '');
+  isEditingTitle = signal(false);
+  titleInput = '';
+
+  // === Theme editor panel state ===
+  themeEditorOpen = signal(false);
+  paletteDraft = {
+    bg: '',
+    panel: '',
+    panel2: '',
+    text: '',
+    muted: '',
+    border: '',
+    primary: '',
+    accent: '',
+  };
+
   constructor(
     private store: LocalStorageService,
     public theme: ThemeService,
@@ -115,6 +139,34 @@ export class AppComponent {
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
       this.openAdminPanel();
     }
+  }
+
+  displayTitle = computed(
+    () => this.customTitle() || this.t.instant('APP_TITLE')
+  );
+
+  startEditTitle() {
+    const custom = this.customTitle();
+    if (custom) {
+      this.titleInput = custom;
+      this.isEditingTitle.set(true);
+      return;
+    }
+    // get() waits for the file to load; no “APP_TITLE” flash
+    this.t.get('APP_TITLE').subscribe((v) => {
+      this.titleInput = v;
+      this.isEditingTitle.set(true);
+    });
+  }
+  saveTitle() {
+    const v = (this.titleInput ?? '').trim();
+    this.customTitle.set(v);
+    if (v) localStorage.setItem(this.TITLE_KEY, v);
+    else localStorage.removeItem(this.TITLE_KEY);
+    this.isEditingTitle.set(false);
+  }
+  cancelEditTitle() {
+    this.isEditingTitle.set(false);
   }
 
   async registerAccount() {
@@ -159,7 +211,10 @@ export class AppComponent {
   /* ---------- Calendar helpers ---------- */
   monthLabel = computed(() => {
     const d = new Date(this.viewYear(), this.viewMonth(), 1);
-    return d.toLocaleString(this.lang.lang(), { month: 'long', year: 'numeric' });
+    return d.toLocaleString(this.lang.lang(), {
+      month: 'long',
+      year: 'numeric',
+    });
   });
 
   calendarDays = computed(() => {
@@ -481,5 +536,23 @@ export class AppComponent {
       console.error(err);
       alert('Failed to reset password: ' + (err?.message ?? err));
     }
+  }
+
+  openThemeEditor() {
+    const p = this.theme.palette();
+    this.paletteDraft = { ...p };
+    this.themeEditorOpen.set(true);
+  }
+  closeThemeEditor() {
+    this.themeEditorOpen.set(false);
+  }
+  saveTheme() {
+    this.theme.setCustom({ ...this.paletteDraft });
+    this.themeEditorOpen.set(false);
+  }
+  resetTheme(kind: 'light' | 'dark' = 'dark') {
+    this.theme.resetCustom(kind);
+    const p = this.theme.palette();
+    this.paletteDraft = { ...p };
   }
 }
